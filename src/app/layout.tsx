@@ -8,6 +8,7 @@ import "./globals.css";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import AuthProvider from "#/components/providers/authProvider";
+import SearchProvider from "#/lib/context/search-context";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -36,11 +37,17 @@ export default async function RootLayout({
           <TanstackProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="system"
+              defaultTheme="dark"
               enableSystem
               disableTransitionOnChange
             >
-              {children}
+              <SearchProvider>
+                <main className="flex flex-col min-h-screen">
+                  <div className="flex flex-col flex-1 bg-muted/50">
+                    {children}
+                  </div>
+                </main>
+              </SearchProvider>
               <Toaster position="top-center" />
             </ThemeProvider>
           </TanstackProvider>

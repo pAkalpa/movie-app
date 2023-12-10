@@ -3,15 +3,17 @@ export interface ILoginRegister {
   password: string;
 }
 
-export interface IMovieData {
-  id: string;
+export interface SearchContextType {
+  searchValue: string;
+  handleSearch: (value: string) => void;
+}
+
+export interface IMovieUpdateData {
   title: string;
-  image: string;
   genre: string;
   language: string;
   release: string;
   runtime: string;
   plot: string;
+  image?: any;
 }
-
-export interface IMovieUpdate {}

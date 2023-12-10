@@ -56,7 +56,6 @@ export default async function LoginPage() {
               Enter your email and Password below to Login
             </p>
           </div>
-
           <UserAuthForm type="login" />
         </div>
       </div>

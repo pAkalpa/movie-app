@@ -3,6 +3,7 @@ import prisma from "#/lib/db";
 import { Prisma } from "@prisma/client";
 import { ILoginRegister } from "#/lib/types";
 import bcrypt from "bcrypt";
+import { NextApiRequest, NextApiResponse } from "next";
 
 const hashPassword = async (password: string) => {
   try {
@@ -15,8 +16,8 @@ const hashPassword = async (password: string) => {
   }
 };
 
-export async function POST(request: NextRequest) {
-  const body: ILoginRegister = await request.json();
+export async function POST(request: NextApiRequest, response: NextApiResponse) {
+  const body: ILoginRegister = await request.body.json();
   try {
     await prisma.users.create({
       data: {
@@ -24,21 +25,15 @@ export async function POST(request: NextRequest) {
         password: await hashPassword(body.password),
       },
     });
-    return NextResponse.json({ success: true }, { status: 201 });
+    return response.status(201).json({ success: true });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       console.log("🤬 ~ file: route.ts:17 ~ POST ~ error:", error.code);
       if (error.code === "P2002") {
-        return NextResponse.json(
-          { error: "Email already exists" },
-          { status: 400 }
-        );
+        return response.status(400).json({ error: "Email already exists" });
       }
     }
     console.log("🤬 ~ file: route.ts:25 ~ POST ~ error:", error);
-    return NextResponse.json(
-      { error: "Unable to create user" },
-      { status: 500 }
-    );
+    return response.status(500).json({ error: "Unable to create user" });
   }
 }
