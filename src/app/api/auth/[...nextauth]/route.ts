@@ -1,23 +1,8 @@
 import NextAuth from "next-auth";
 import credentials from "next-auth/providers/credentials";
-import prisma from "#/lib/db";
-import { users } from "@prisma/client";
 import { z } from "zod";
 import bcrypt from "bcrypt";
-
-const getUser = async (email: string): Promise<users | null> => {
-  try {
-    const user = await prisma.users.findUnique({
-      where: {
-        email,
-      },
-    });
-    return user;
-  } catch (error) {
-    console.log("🤬 ~ file: auth.ts:17 ~ getUser ~ error:", error);
-    throw new Error("Unable to find user");
-  }
-};
+import { getUser } from "#/functions/db/dbFunctions";
 
 const handler = NextAuth({
   session: {

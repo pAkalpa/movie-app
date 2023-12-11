@@ -13,6 +13,9 @@ export default function AddmoviePage() {
   };
   return (
     <div className="bg-secondary relative px-4 md:px-0">
+      <div className="flex flex-row items-center">
+        <h1 className="text-xl font-medium">Add Movie to DB</h1>
+      </div>
       <div className="container mx-auto min-h-[calc(100vh-77px)] flex items-center relative">
         <div className="flex-col lg:flex-row flex gap-10 lg:mx-10 py-20">
           <div className="mx-auto flex-none relative">

@@ -24,21 +24,15 @@ export const deleteMovie = async (id: string): Promise<void> => {
 };
 
 export const updateMovie = async (data: FormData): Promise<void> => {
-  await fetch(`/api/movies`, {
+  await fetch("/api/movies", {
     method: "PUT",
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
     body: data,
   });
 };
 
 export const createMovie = async (data: FormData): Promise<void> => {
-  await fetch(`/api/movies`, {
+  await fetch("/api/movies", {
     method: "POST",
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
     body: data,
   });
 };

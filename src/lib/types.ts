@@ -9,11 +9,23 @@ export interface SearchContextType {
 }
 
 export interface IMovieUpdateData {
+  id?: string;
   title: string;
   genre: string;
   language: string;
   release: string;
   runtime: string;
   plot: string;
-  image?: any;
+  image?: string;
+}
+
+export interface IMovieUpdate {
+  id: string;
+  title?: string;
+  genre?: string;
+  language?: string;
+  image?: string;
+  release?: string;
+  runtime?: string;
+  plot?: string;
 }

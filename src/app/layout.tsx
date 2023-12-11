@@ -5,8 +5,6 @@ import { ThemeProvider } from "#/components/providers/themeProvider";
 import { Toaster } from "sonner";
 import TanstackProvider from "#/components/providers/tanstackProvider";
 import "./globals.css";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 import AuthProvider from "#/components/providers/authProvider";
 import SearchProvider from "#/lib/context/search-context";
 

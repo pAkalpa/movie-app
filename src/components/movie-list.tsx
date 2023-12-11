@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import MovieCard from "./movie-card";
 import { useSearch } from "#/lib/hooks/useSearch";
 import { toast } from "sonner";
+import Loading from "#/app/loading";
 
 const MovieList = () => {
   const { searchValue } = useSearch();
@@ -20,7 +21,7 @@ const MovieList = () => {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (isError) {

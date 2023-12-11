@@ -1,24 +1,26 @@
-import prisma from "#/lib/db";
+import {
+  createMovie,
+  deleteMovie,
+  getAllMovies,
+  getMovie,
+  searchMovies,
+  updateMovie,
+} from "#/functions/db/dbFunctions";
+import { IMovieUpdateData } from "#/lib/types";
 import { Prisma } from "@prisma/client";
+import { writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const search = request.nextUrl.searchParams.get("search") as string;
-    console.log("🤬 ~ file: route.ts:8 ~ GET ~ search:", search);
+    const searchString = request.nextUrl.searchParams.get("search") as string;
 
-    if (!search || typeof search !== "string") {
-      const movies = await prisma.movies.findMany();
+    if (!searchString || typeof searchString !== "string") {
+      const movies = await getAllMovies();
       return NextResponse.json(movies, { status: 200 });
     }
 
-    const movies = await prisma.movies.findMany({
-      where: {
-        title: {
-          contains: search,
-        },
-      },
-    });
+    const movies = await searchMovies(searchString);
 
     return NextResponse.json(movies, { status: 200 });
   } catch (error) {
@@ -31,23 +33,54 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const data = await request.formData();
-  console.log("🤬 ~ file: route.ts:36 ~ POST ~ data:", data);
+  try {
+    const data = await request.formData();
+    const file: File | null = data.get("image") as unknown as File;
+    const movieString: string | null = data.get("data") as unknown as string;
+    const movieData: IMovieUpdateData = JSON.parse(movieString);
+    console.log("🚀 ~ file: route.ts:41 ~ POST ~ movieData:", movieData);
+    if (!movieData) {
+      return NextResponse.json({ success: false }, { status: 400 });
+    }
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const path = `./public/uploads/${file.name}`;
+    await writeFile(path, buffer);
+    movieData.image = `/uploads/${file.name}`;
+    await createMovie(movieData);
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ success: false }, { status: 400 });
+  }
 }
 
 export async function PUT(request: NextRequest) {
-  const data = await request.formData();
-  console.log("🤬 ~ file: route.ts:40 ~ PUT ~ data:", data);
+  try {
+    const data = await request.formData();
+    const file: File | null = data.get("image") as unknown as File;
+    const movieString: string | null = data.get("data") as unknown as string;
+    const movieData: IMovieUpdateData = JSON.parse(movieString);
+    if (!movieData) {
+      return NextResponse.json({ success: false }, { status: 400 });
+    }
+    if (file.name !== undefined) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const path = `./public/uploads/${file.name}`;
+      await writeFile(path, buffer);
+      movieData.image = `/uploads/${file.name}`;
+    }
+    await updateMovie(movieData);
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ success: false }, { status: 400 });
+  }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
     const mid = request.nextUrl.searchParams.get("mid") as string;
-    await prisma.movies.delete({
-      where: {
-        id: mid,
-      },
-    });
+    await deleteMovie(mid);
     return NextResponse.json({ message: "Movie deleted" }, { status: 200 });
   } catch (error) {
     console.log("🤬 ~ file: route.ts:42 ~ DELETE ~ error:", error);

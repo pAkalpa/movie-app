@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import prisma from "#/lib/db";
 import { Prisma } from "@prisma/client";
 import { ILoginRegister } from "#/lib/types";
 import bcrypt from "bcrypt";
 import { NextApiRequest, NextApiResponse } from "next";
+import { createUser } from "#/functions/db/dbFunctions";
 
 const hashPassword = async (password: string) => {
   try {
@@ -19,11 +18,9 @@ const hashPassword = async (password: string) => {
 export async function POST(request: NextApiRequest, response: NextApiResponse) {
   const body: ILoginRegister = await request.body.json();
   try {
-    await prisma.users.create({
-      data: {
-        email: body.email,
-        password: await hashPassword(body.password),
-      },
+    await createUser({
+      email: body.email,
+      password: await hashPassword(body.password),
     });
     return response.status(201).json({ success: true });
   } catch (error) {

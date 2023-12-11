@@ -14,10 +14,12 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { createMovie, updateMovie } from "#/functions/client/movieFunctions";
 import { useSearch } from "#/lib/hooks/useSearch";
+import { Textarea } from "./ui/textarea";
+import { toast } from "sonner";
 
 interface MovieAddEditFormProps extends React.HTMLAttributes<HTMLDivElement> {
   type: "add" | "edit";
@@ -46,6 +48,24 @@ export function MovieAddEditForm({
   const queryClient = useQueryClient();
   const router = useRouter();
   const { searchValue } = useSearch();
+  const { mutateAsync: updateMovieAsync } = useMutation({
+    mutationFn: updateMovie,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["movies", { searchValue }],
+      });
+      router.replace("/");
+    },
+  });
+  const { mutateAsync: createMovieAsync } = useMutation({
+    mutationFn: createMovie,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["movies", { searchValue }],
+      });
+      router.replace("/");
+    },
+  });
 
   const schema = z.object({
     title: z.string().min(1).max(255),
@@ -73,20 +93,25 @@ export function MovieAddEditForm({
   });
 
   async function onSubmit(data: FormValues) {
-    console.log(
-      "🤬 ~ file: `movie-add-edit-form.tsx:49 ~ onSubmit ~ data:",
-      data
-    );
     const fd = new FormData();
-    fd.append("image", data.image[0]);
-    // fd.append("data", JSON.stringify({ ...data }));
-    Object.entries(data).forEach(([key, value]) => {
-      if (key !== "image") {
-        fd.append(key, value);
+    const { image, ...rest } = data;
+    if (type === "edit") {
+      if (image !== undefined) {
+        fd.set("image", image[0]);
       }
-    });
-    if (type === "add") {
+      fd.set(
+        "data",
+        JSON.stringify({ id: movieData?.id, image: movieData?.image, ...rest })
+      );
+      await updateMovieAsync(fd);
     } else {
+      if (image === undefined) {
+        toast.warning("Please Upload Image and Try again");
+        return;
+      }
+      fd.set("image", image[0]);
+      fd.set("data", JSON.stringify({ ...rest }));
+      await createMovieAsync(fd);
     }
   }
 
@@ -187,7 +212,7 @@ export function MovieAddEditForm({
             <FormItem>
               <FormLabel>Movie Plot</FormLabel>
               <FormControl>
-                <Input placeholder="Plot" {...field} />
+                <Textarea placeholder="Plot" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
